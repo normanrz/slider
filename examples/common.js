@@ -20219,17 +20219,21 @@
 	        { ref: 'slider', className: sliderClassName,
 	          onTouchStart: disabled ? noop : this.onTouchStart.bind(this),
 	          onMouseDown: disabled ? noop : this.onMouseDown.bind(this) },
-	        upper,
-	        lower,
-	        _react2['default'].createElement(_Track2['default'], { className: prefixCls + '-track', vertical: vertical, included: isIncluded,
-	          offset: lowerOffset, length: upperOffset - lowerOffset }),
-	        _react2['default'].createElement(_Steps2['default'], { prefixCls: prefixCls, vertical: vertical, marks: marks, dots: dots, step: step,
-	          included: isIncluded, lowerBound: lowerBound,
-	          upperBound: upperBound, max: max, min: min }),
-	        _react2['default'].createElement(_Marks2['default'], { className: prefixCls + '-mark', vertical: vertical, marks: marks,
-	          included: isIncluded, lowerBound: lowerBound,
-	          upperBound: upperBound, max: max, min: min }),
-	        children
+	        _react2['default'].createElement(
+	          'div',
+	          { className: prefixCls + '-slider' },
+	          upper,
+	          lower,
+	          _react2['default'].createElement(_Track2['default'], { className: prefixCls + '-track', vertical: vertical, included: isIncluded,
+	            offset: lowerOffset, length: upperOffset - lowerOffset }),
+	          _react2['default'].createElement(_Steps2['default'], { prefixCls: prefixCls, vertical: vertical, marks: marks, dots: dots, step: step,
+	            included: isIncluded, lowerBound: lowerBound,
+	            upperBound: upperBound, max: max, min: min }),
+	          _react2['default'].createElement(_Marks2['default'], { className: prefixCls + '-mark', vertical: vertical, marks: marks,
+	            included: isIncluded, lowerBound: lowerBound,
+	            upperBound: upperBound, max: max, min: min }),
+	          children
+	        )
 	      );
 	    }
 	  }]);
@@ -21311,7 +21315,7 @@
 	    getPopupClassNameFromAlign: _react.PropTypes.any,
 	    onPopupVisibleChange: _react.PropTypes.func,
 	    afterPopupVisibleChange: _react.PropTypes.func,
-	    popup: _react.PropTypes.node.isRequired,
+	    popup: _react.PropTypes.oneOfType([_react.PropTypes.node, _react.PropTypes.func]).isRequired,
 	    popupStyle: _react.PropTypes.object,
 	    prefixCls: _react.PropTypes.string,
 	    popupClassName: _react.PropTypes.string,
@@ -21572,7 +21576,7 @@
 	        maskAnimation: props.maskAnimation,
 	        maskTransitionName: props.maskTransitionName
 	      }),
-	      props.popup
+	      typeof props.popup === 'function' ? props.popup() : props.popup
 	    );
 	  },
 	  setPopupVisible: function setPopupVisible(popupVisible) {
@@ -23305,7 +23309,9 @@
 	      });
 	    }
 	    children.forEach(function (child) {
-	      _this.performAppear(child.key);
+	      if (child) {
+	        _this.performAppear(child.key);
+	      }
 	    });
 	  },
 	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
@@ -23328,7 +23334,7 @@
 	    var newChildren = [];
 	    if (showProp) {
 	      currentChildren.forEach(function (currentChild) {
-	        var nextChild = (0, _ChildrenUtils.findChildInChildrenByKey)(nextChildren, currentChild.key);
+	        var nextChild = currentChild && (0, _ChildrenUtils.findChildInChildrenByKey)(nextChildren, currentChild.key);
 	        var newChild = void 0;
 	        if ((!nextChild || !nextChild.props[showProp]) && currentChild.props[showProp]) {
 	          newChild = _react2["default"].cloneElement(nextChild || currentChild, _defineProperty({}, showProp, true));
@@ -23340,7 +23346,7 @@
 	        }
 	      });
 	      nextChildren.forEach(function (nextChild) {
-	        if (!(0, _ChildrenUtils.findChildInChildrenByKey)(currentChildren, nextChild.key)) {
+	        if (!nextChild || !(0, _ChildrenUtils.findChildInChildrenByKey)(currentChildren, nextChild.key)) {
 	          newChildren.push(nextChild);
 	        }
 	      });
@@ -23354,11 +23360,11 @@
 	    });
 	
 	    nextChildren.forEach(function (child) {
-	      var key = child.key;
-	      if (currentlyAnimatingKeys[key]) {
+	      var key = child && child.key;
+	      if (child && currentlyAnimatingKeys[key]) {
 	        return;
 	      }
-	      var hasPrev = (0, _ChildrenUtils.findChildInChildrenByKey)(currentChildren, key);
+	      var hasPrev = child && (0, _ChildrenUtils.findChildInChildrenByKey)(currentChildren, key);
 	      if (showProp) {
 	        var showInNext = child.props[showProp];
 	        if (hasPrev) {
@@ -23375,11 +23381,11 @@
 	    });
 	
 	    currentChildren.forEach(function (child) {
-	      var key = child.key;
-	      if (currentlyAnimatingKeys[key]) {
+	      var key = child && child.key;
+	      if (child && currentlyAnimatingKeys[key]) {
 	        return;
 	      }
-	      var hasNext = (0, _ChildrenUtils.findChildInChildrenByKey)(nextChildren, key);
+	      var hasNext = child && (0, _ChildrenUtils.findChildInChildrenByKey)(nextChildren, key);
 	      if (showProp) {
 	        var showInNow = child.props[showProp];
 	        if (hasNext) {
@@ -23460,15 +23466,19 @@
 	    if (this.isValidChildByKey(currentChildren, key)) {
 	      this.performEnter(key);
 	    } else {
+	      var end = function end() {
+	        if (_util2["default"].allowLeaveCallback(props)) {
+	          props.onLeave(key);
+	          props.onEnd(key, false);
+	        }
+	      };
 	      /* eslint react/no-is-mounted:0 */
 	      if (this.isMounted() && !(0, _ChildrenUtils.isSameChildren)(this.state.children, currentChildren, props.showProp)) {
 	        this.setState({
 	          children: currentChildren
-	        });
-	      }
-	      if (_util2["default"].allowLeaveCallback(props)) {
-	        props.onLeave(key);
-	        props.onEnd(key, false);
+	        }, end);
+	      } else {
+	        end();
 	      }
 	    }
 	  },
@@ -23493,7 +23503,7 @@
 	    var children = null;
 	    if (stateChildren) {
 	      children = stateChildren.map(function (child) {
-	        if (child === null) {
+	        if (child === null || child === undefined) {
 	          return child;
 	        }
 	        if (!child.key) {
@@ -23516,9 +23526,16 @@
 	    }
 	    var Component = props.component;
 	    if (Component) {
+	      var passedProps = props;
+	      if (typeof Component === 'string') {
+	        passedProps = {
+	          className: props.className,
+	          style: props.style
+	        };
+	      }
 	      return _react2["default"].createElement(
 	        Component,
-	        this.props,
+	        passedProps,
 	        children
 	      );
 	    }
@@ -23566,7 +23583,7 @@
 	      if (ret) {
 	        return;
 	      }
-	      if (child.key === key) {
+	      if (child && child.key === key) {
 	        ret = child;
 	      }
 	    });
@@ -23578,7 +23595,7 @@
 	  var ret = null;
 	  if (children) {
 	    children.forEach(function (child) {
-	      if (child.key === key && child.props[showProp]) {
+	      if (child && child.key === key && child.props[showProp]) {
 	        if (ret) {
 	          throw new Error('two child with same key for <rc-animate> children');
 	        }
@@ -23596,7 +23613,7 @@
 	      if (found) {
 	        return;
 	      }
-	      found = child.key === key && !child.props[showProp];
+	      found = child && child.key === key && !child.props[showProp];
 	    });
 	  }
 	  return found;
@@ -23607,10 +23624,14 @@
 	  if (same) {
 	    c1.forEach(function (child, index) {
 	      var child2 = c2[index];
-	      if (child.key !== child2.key) {
-	        same = false;
-	      } else if (showProp && child.props[showProp] !== child2.props[showProp]) {
-	        same = false;
+	      if (child && child2) {
+	        if (child && !child2 || !child && child2) {
+	          same = false;
+	        } else if (child.key !== child2.key) {
+	          same = false;
+	        } else if (showProp && child.props[showProp] !== child2.props[showProp]) {
+	          same = false;
+	        }
 	      }
 	    });
 	  }
@@ -23625,7 +23646,7 @@
 	  var nextChildrenPending = {};
 	  var pendingChildren = [];
 	  prev.forEach(function (child) {
-	    if (findChildInChildrenByKey(next, child.key)) {
+	    if (child && findChildInChildrenByKey(next, child.key)) {
 	      if (pendingChildren.length) {
 	        nextChildrenPending[child.key] = pendingChildren;
 	        pendingChildren = [];
@@ -23636,7 +23657,7 @@
 	  });
 	
 	  next.forEach(function (child) {
-	    if (nextChildrenPending.hasOwnProperty(child.key)) {
+	    if (child && nextChildrenPending.hasOwnProperty(child.key)) {
 	      ret = ret.concat(nextChildrenPending[child.key]);
 	    }
 	    ret.push(child);
@@ -23697,14 +23718,14 @@
 	    if (_util2["default"].isEnterSupported(this.props)) {
 	      this.transition('enter', done);
 	    } else {
-	      setTimeout(done, 0);
+	      done();
 	    }
 	  },
 	  componentWillAppear: function componentWillAppear(done) {
 	    if (_util2["default"].isAppearSupported(this.props)) {
 	      this.transition('appear', done);
 	    } else {
-	      setTimeout(done, 0);
+	      done();
 	    }
 	  },
 	  componentWillLeave: function componentWillLeave(done) {
@@ -23714,7 +23735,7 @@
 	      // always sync, do not interupt with react component life cycle
 	      // update hidden -> animate hidden ->
 	      // didUpdate -> animate leave -> unmount (if animate is none)
-	      setTimeout(done, 0);
+	      done();
 	    }
 	  },
 	  transition: function transition(animationType, finishCallback) {
@@ -24364,11 +24385,15 @@
 	  },
 	  render: function render() {
 	    if (this.props.hiddenClassName) {
-	      var className = this.props.className;
-	      if (!this.props.visible) {
-	        className += ' ' + this.props.hiddenClassName;
+	      var props = _extends({}, this.props);
+	      var className = props.className;
+	      if (!props.visible) {
+	        className += ' ' + props.hiddenClassName;
 	      }
-	      return _react2["default"].createElement('div', _extends({}, this.props, { className: className }));
+	      props.className = className;
+	      delete props.hiddenClassName;
+	      delete props.visible;
+	      return _react2["default"].createElement('div', props);
 	    }
 	    if (_react2["default"].Children.count(this.props.children) > 1) {
 	      return _react2["default"].createElement('div', this.props);

@@ -1,5 +1,16 @@
 .rc-slider {
   position: relative;
+  height: 40px;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+.rc-slider * {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+.rc-slider-slider {
+  position: relative;
+  margin: 18px 0;
   height: 4px;
   width: 100%;
   border-radius: 6px;
@@ -7,7 +18,7 @@
   box-sizing: border-box;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
-.rc-slider * {
+.rc-slider-slider * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
